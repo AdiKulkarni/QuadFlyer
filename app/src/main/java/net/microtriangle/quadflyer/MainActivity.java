@@ -2,11 +2,11 @@ package net.microtriangle.quadflyer;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,8 +30,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surface);
-        //MjpegHelper.getInstance().setup(this);
+        MjpegHelper.getInstance().setup(this);
+        MjpegHelper.getInstance().start();
 
         TextView textView = (TextView) findViewById(R.id.textViewIpAddress);
         textView.setText("IP: " + getIPAddresses().toString());
@@ -41,9 +41,11 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (streaming) {
-                    MjpegHelper.getInstance().stop();
+                    //MjpegHelper.getInstance().stop();
+                    MjpegHelper.getInstance().setSize(176, 144);
                 } else {
-                    MjpegHelper.getInstance().start(MainActivity.this);
+                    //MjpegHelper.getInstance().start();
+                    MjpegHelper.getInstance().setSize(960, 540);
                 }
                 streaming = !streaming;
             }

@@ -5,8 +5,8 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
+import android.hardware.Camera.Size;
 import android.util.Log;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import net.microtriangle.quadflyer.web.MjpegBridge;
@@ -21,6 +21,10 @@ public class MjpegHelper {
     private MjpegBridge bridge;
     private Camera camera;
     private Context context;
+
+    private int previewWidth = -1;
+    private int previewHeight = -1;
+
     private long previousFrameTimestamp;
 
     private static volatile MjpegHelper instance;
@@ -41,8 +45,11 @@ public class MjpegHelper {
         return instance;
     }
 
-    public void start(Context context) {
+    public void setup(Context context) {
         this.context = context;
+    }
+
+    public void start() {
         SurfaceView surfaceView = new SurfaceView(context);
 
         camera = Camera.open();
@@ -51,14 +58,17 @@ public class MjpegHelper {
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
-        Camera.Parameters parameters = camera.getParameters();
-        Camera.Size size = getBestPreviewSize(960, 540, parameters);
+        Parameters parameters = camera.getParameters();
 
-        if (size!=null) {
-            parameters.setPreviewSize(size.width, size.height);
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-            camera.setParameters(parameters);
+        if (previewWidth == -1 || previewHeight == -1) {
+            Size size = parameters.getSupportedPictureSizes().get(0);
+            previewWidth = size.width;
+            previewHeight = size.height;
         }
+
+        parameters.setPreviewSize(previewWidth, previewHeight);
+        parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        camera.setParameters(parameters);
 
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
@@ -88,28 +98,6 @@ public class MjpegHelper {
         camera.release();
     }
 
-
-    private Camera.Size getBestPreviewSize(int width, int height, Camera.Parameters parameters) {
-        Camera.Size result = null;
-
-        for (Camera.Size size : parameters.getSupportedPreviewSizes()) {
-            if (size.width <= width && size.height <= height) {
-                if (result == null) {
-                    result = size;
-                } else {
-                    int resultArea = result.width * result.height;
-                    int newArea = size.width * size.height;
-
-                    if (newArea > resultArea) {
-                        result = size;
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
     public MjpegBridge getBridge() {
         return bridge;
     }
@@ -120,5 +108,10 @@ public class MjpegHelper {
         camera.setParameters(parameters);
     }
 
-    public void
+    public void setSize(int width, int height) {
+        stop();
+        previewWidth = width;
+        previewHeight = height;
+        start();
+    }
 }
