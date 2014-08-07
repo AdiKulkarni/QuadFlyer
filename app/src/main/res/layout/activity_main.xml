@@ -16,4 +16,12 @@
         android:id="@+id/textViewIpAddress"
         android:gravity="center_horizontal" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Toggle MJPEG"
+        android:id="@+id/buttonMjpeg"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

@@ -7,6 +7,8 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.apache.http.conn.util.InetAddressUtils;
@@ -21,18 +23,31 @@ import java.util.List;
 public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getName();
 
-    private UsbHelper usbHelper;
+    private boolean streaming = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surface);
-        MjpegHelper.getInstance().setup(this, surfaceView);
+        //SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surface);
+        //MjpegHelper.getInstance().setup(this);
 
         TextView textView = (TextView) findViewById(R.id.textViewIpAddress);
         textView.setText("IP: " + getIPAddresses().toString());
+
+        Button buttonMjpeg = (Button) findViewById(R.id.buttonMjpeg);
+        buttonMjpeg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (streaming) {
+                    MjpegHelper.getInstance().stop();
+                } else {
+                    MjpegHelper.getInstance().start(MainActivity.this);
+                }
+                streaming = !streaming;
+            }
+        });
 
         this.startService(new Intent(this, WebService.class));
         this.startService(new Intent(this, UsbService.class));

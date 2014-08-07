@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -18,10 +19,8 @@ import java.io.ByteArrayOutputStream;
 public class MjpegHelper {
     private static final String TAG = MjpegHelper.class.getName();
     private MjpegBridge bridge;
-    private SurfaceView surfaceView;
     private Camera camera;
     private Context context;
-
     private long previousFrameTimestamp;
 
     private static volatile MjpegHelper instance;
@@ -42,19 +41,25 @@ public class MjpegHelper {
         return instance;
     }
 
-    public void setup(Context context, SurfaceView surfaceView) {
+    public void start(Context context) {
         this.context = context;
-        this.surfaceView = surfaceView;
-    }
-
-    public void start() {
-        if (surfaceView == null) {
-            Log.e(TAG, "Can't start without a surface view");
-            return;
-        }
-        previousFrameTimestamp = 0;
+        SurfaceView surfaceView = new SurfaceView(context);
 
         camera = Camera.open();
+        try {
+            camera.setPreviewDisplay(surfaceView.getHolder());
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size size = getBestPreviewSize(960, 540, parameters);
+
+        if (size!=null) {
+            parameters.setPreviewSize(size.width, size.height);
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            camera.setParameters(parameters);
+        }
+
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
             public void onPreviewFrame(byte[] bytes, Camera camera) {
@@ -75,31 +80,7 @@ public class MjpegHelper {
             }
         });
 
-        surfaceView.getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
-            public void surfaceCreated(SurfaceHolder holder) {
-                // no-op -- wait until surfaceChanged()
-                Log.e(TAG, "Surface created");
-            }
-
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                Log.e(TAG, "Surface changed");
-                Camera.Parameters parameters = camera.getParameters();
-                Camera.Size size = getBestPreviewSize(width, height, parameters);
-
-                if (size!=null) {
-                    parameters.setPreviewSize(size.width, size.height);
-                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                    camera.setParameters(parameters);
-                }
-                camera.startPreview();
-            }
-
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                Log.e(TAG, "Surface destroyed");
-                // no-op
-            }
-        });
+        camera.startPreview();
     }
 
     public void stop() {
@@ -129,11 +110,15 @@ public class MjpegHelper {
         return result;
     }
 
-    public SurfaceView getSurfaceView() {
-        return this.surfaceView;
-    }
-
     public MjpegBridge getBridge() {
         return bridge;
     }
+
+    public void setFlash(boolean on) {
+        Parameters parameters = camera.getParameters();
+        parameters.setFlashMode(on ? Parameters.FLASH_MODE_TORCH : Parameters.FLASH_MODE_OFF);
+        camera.setParameters(parameters);
+    }
+
+    public void
 }

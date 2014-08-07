@@ -32,7 +32,7 @@ public class WebService extends Service {
     }
 
     public void onCreate() {
-        MjpegHelper.getInstance().start();
+        //MjpegHelper.getInstance().start();
 
         server = new WebServer(4001, this);
         try {
