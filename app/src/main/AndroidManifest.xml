@@ -18,6 +18,7 @@
         android:theme="@android:style/Theme.NoTitleBar" >
 
         <service android:enabled="true" android:name="net.microtriangle.quadflyer.WebService"/>
+        <service android:enabled="true" android:name="net.microtriangle.quadflyer.UsbService"/>
 
         <activity
             android:name=".MainActivity"

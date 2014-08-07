@@ -55,19 +55,21 @@ public class MjpegResponse extends NanoHTTPD.Response {
             MjpegBridge bridge = MjpegHelper.getInstance().getBridge();
             while (true) {
                 MjpegFrame frame = bridge.getFrame();
-                byte[] imageData = frame.getImageData();
-                long timestamp = frame.getTimestamp();
+                if (frame != null) {
+                    byte[] imageData = frame.getImageData();
+                    long timestamp = frame.getTimestamp();
 
-                pw.write("Content-type: image/jpeg\r\n");
-                pw.write("Content-Length: " + imageData.length + "\r\n");
-                pw.write("X-Timestamp: " + timestamp + "\r\n");
-                pw.write("\r\n");
-                pw.flush();
+                    pw.write("Content-type: image/jpeg\r\n");
+                    pw.write("Content-Length: " + imageData.length + "\r\n");
+                    pw.write("X-Timestamp: " + timestamp + "\r\n");
+                    pw.write("\r\n");
+                    pw.flush();
 
-                outputStream.write(imageData, 0, imageData.length);
-                outputStream.flush();
-                pw.print("\r\n" + BOUNDARY + "\r\n");
-                pw.flush();
+                    outputStream.write(imageData, 0, imageData.length);
+                    outputStream.flush();
+                    pw.print("\r\n" + BOUNDARY + "\r\n");
+                    pw.flush();
+                }
 
                 synchronized (bridge) {
                     bridge.wait();

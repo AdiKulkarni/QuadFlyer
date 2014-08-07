@@ -16,6 +16,9 @@ public class MjpegBridge {
     }
 
     public synchronized MjpegFrame getFrame() {
-        return frame.clone();
+        if (frame != null) {
+            return frame.clone();
+        }
+        return null;
     }
 }

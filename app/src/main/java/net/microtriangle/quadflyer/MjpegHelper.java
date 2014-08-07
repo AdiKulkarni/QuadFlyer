@@ -1,5 +1,6 @@
 package net.microtriangle.quadflyer;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
@@ -19,9 +20,9 @@ public class MjpegHelper {
     private MjpegBridge bridge;
     private SurfaceView surfaceView;
     private Camera camera;
+    private Context context;
 
     private long previousFrameTimestamp;
-    private long previousFocusTimestamp;
 
     private static volatile MjpegHelper instance;
 
@@ -41,6 +42,10 @@ public class MjpegHelper {
         return instance;
     }
 
+    public void setup(Context context, SurfaceView surfaceView) {
+        this.context = context;
+        this.surfaceView = surfaceView;
+    }
 
     public void start() {
         if (surfaceView == null) {
@@ -48,7 +53,6 @@ public class MjpegHelper {
             return;
         }
         previousFrameTimestamp = 0;
-        previousFocusTimestamp = 0;
 
         camera = Camera.open();
         camera.setPreviewCallback(new Camera.PreviewCallback() {
@@ -68,11 +72,6 @@ public class MjpegHelper {
                     bridge.updateImage(timestamp, imageData);
                     previousFrameTimestamp = timestamp;
                 }
-
-                if (timestamp - previousFocusTimestamp > 400) {
-                    camera.autoFocus(null);
-                    previousFocusTimestamp = timestamp;
-                }
             }
         });
 
@@ -80,21 +79,24 @@ public class MjpegHelper {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             public void surfaceCreated(SurfaceHolder holder) {
                 // no-op -- wait until surfaceChanged()
+                Log.e(TAG, "Surface created");
             }
 
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                Log.e(TAG, "Surface changed");
                 Camera.Parameters parameters = camera.getParameters();
                 Camera.Size size = getBestPreviewSize(width, height, parameters);
 
                 if (size!=null) {
                     parameters.setPreviewSize(size.width, size.height);
-                    parameters.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                    parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                     camera.setParameters(parameters);
                 }
                 camera.startPreview();
             }
 
             public void surfaceDestroyed(SurfaceHolder holder) {
+                Log.e(TAG, "Surface destroyed");
                 // no-op
             }
         });
@@ -125,10 +127,6 @@ public class MjpegHelper {
         }
 
         return result;
-    }
-
-    public void setSurfaceView(SurfaceView surfaceView) {
-        this.surfaceView = surfaceView;
     }
 
     public SurfaceView getSurfaceView() {
