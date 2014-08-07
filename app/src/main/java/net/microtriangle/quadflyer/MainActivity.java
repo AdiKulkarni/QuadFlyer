@@ -42,10 +42,12 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 if (streaming) {
                     //MjpegHelper.getInstance().stop();
-                    MjpegHelper.getInstance().setSize(176, 144);
+                    //MjpegHelper.getInstance().setSize(176, 144);
+                    MjpegHelper.getInstance().setZoom(0);
                 } else {
                     //MjpegHelper.getInstance().start();
-                    MjpegHelper.getInstance().setSize(960, 540);
+                    //MjpegHelper.getInstance().setSize(960, 540);
+                    MjpegHelper.getInstance().setZoom(-1);
                 }
                 streaming = !streaming;
             }

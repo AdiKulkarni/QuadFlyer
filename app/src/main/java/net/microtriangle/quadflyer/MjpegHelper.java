@@ -75,7 +75,7 @@ public class MjpegHelper {
             public void onPreviewFrame(byte[] bytes, Camera camera) {
                 long timestamp = System.currentTimeMillis();
 
-                if (timestamp - previousFrameTimestamp > 500) {
+                if (timestamp - previousFrameTimestamp > 100) {
                     Rect rect = new Rect(0, 0, camera.getParameters().getPreviewSize().width, camera.getParameters().getPreviewSize().height);
                     YuvImage image = new YuvImage(bytes, camera.getParameters().getPreviewFormat(), camera.getParameters().getPreviewSize().width, camera.getParameters().getPreviewSize().height, null);
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -113,5 +113,14 @@ public class MjpegHelper {
         previewWidth = width;
         previewHeight = height;
         start();
+    }
+
+    public void setZoom(int value) {
+        Log.e(TAG, camera.getParameters().getMaxZoom() + "");
+        if (value == -1) {
+            camera.startSmoothZoom(camera.getParameters().getMaxZoom());
+        } else {
+            camera.startSmoothZoom(value);
+        }
     }
 }
