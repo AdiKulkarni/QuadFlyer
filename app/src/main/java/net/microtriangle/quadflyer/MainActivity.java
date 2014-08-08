@@ -2,10 +2,7 @@ package net.microtriangle.quadflyer;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.hardware.Camera;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,7 +28,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         MjpegHelper.getInstance().setup(this);
-        MjpegHelper.getInstance().start();
 
         TextView textView = (TextView) findViewById(R.id.textViewIpAddress);
         textView.setText("IP: " + getIPAddresses().toString());
@@ -41,13 +37,9 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (streaming) {
-                    //MjpegHelper.getInstance().stop();
-                    //MjpegHelper.getInstance().setSize(176, 144);
-                    MjpegHelper.getInstance().setZoom(0);
+                    MjpegHelper.getInstance().stop();
                 } else {
-                    //MjpegHelper.getInstance().start();
-                    //MjpegHelper.getInstance().setSize(960, 540);
-                    MjpegHelper.getInstance().setZoom(-1);
+                    MjpegHelper.getInstance().start();
                 }
                 streaming = !streaming;
             }
@@ -56,9 +48,6 @@ public class MainActivity extends Activity {
         this.startService(new Intent(this, WebService.class));
         this.startService(new Intent(this, UsbService.class));
 
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "QuadFlyer Wakelock");
-        wakeLock.acquire();
     }
 
     public List<String> getIPAddresses() {

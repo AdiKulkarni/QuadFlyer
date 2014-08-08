@@ -6,6 +6,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -32,8 +33,6 @@ public class WebService extends Service {
     }
 
     public void onCreate() {
-        //MjpegHelper.getInstance().start();
-
         server = new WebServer(4001, this);
         try {
             server.start();

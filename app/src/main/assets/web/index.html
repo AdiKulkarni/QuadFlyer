@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="quadflyer">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <script src="js/angular.min.js"></script>
     <script src="js/ui-bootstrap-0.11.0.min.js"></script>
+    <script src="js/quadflyer.js"></script>
 </head>
 
-<body>
+<body ng-controller="MainCtrl">
 <div class="container">
+    {{test}}
     <div class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
@@ -24,6 +26,50 @@
     <div class="jumbotron text-center">
         <img src="/videostream">
     </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="quality">Quality: {{data.quality}}</label>
+                <input type="range" min="0" max="100" step="1" id="quality" ng-model="data.quality" ng-mouseup="update('quality', data.quality)">
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="zoom">Zoom: {{data.zoom}}</label>
+                <input type="range" min="0" max="{{data.maxZoom}}" step="1" id="zoom" ng-model="data.zoom" ng-mouseup="update('zoom', data.zoom)">
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="delay">Delay: {{data.delay}}</label>
+                <input type="range" min="100" max="1000" step="100" id="delay" ng-model="data.delay" ng-mouseup="update('delay', data.delay)">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <label>Flash: </label><br>
+            <label for="flash_on">On</label>
+            <input type="radio" id="flash_on" ng-model="data.flash" ng-value="true" ng-click="update('flash', true)">
+            <label for="flash_off">Off</label>
+            <input type="radio" id="flash_off" ng-model="data.flash" ng-value="false" ng-click="update('flash', false)">
+        </div>
+
+        <!--
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="delay">Resolution: {{data.resolution}}</label>
+                <input type="range" min="0" max="{{data.numResolution}}" step="1" id="resolution" ng-model="data.resolution" ng-mouseup="update('resolution', data.resolution)">
+            </div>
+        </div>
+        //-->
+
+    </div>
+
 </div>
 </body>
 </html>
