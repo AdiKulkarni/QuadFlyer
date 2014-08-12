@@ -12,6 +12,7 @@ import net.microtriangle.quadflyer.web.WebServer;
  */
 public class UsbService extends Service {
     private static final String TAG = UsbService.class.getName();
+    public static final String NOTIFICATION = UsbService.class.getName();
     private WebServer server;
 
     @Override
@@ -24,7 +25,22 @@ public class UsbService extends Service {
     }
 
     public void onCreate() {
-        UsbHelper.getInstance().start(this);
+        UsbHelper.getInstance().start(this, new UsbHelper.UsbListener() {
+            @Override
+            public void connected(boolean usbConnected) {
+                Intent intent = new Intent(TAG);
+                intent.putExtra("connected", true);
+                intent.putExtra("usbConnected", usbConnected);
+                sendBroadcast(intent);
+            }
+
+            @Override
+            public void disconnected() {
+                Intent intent = new Intent(TAG);
+                intent.putExtra("connected", false);
+                sendBroadcast(intent);
+            }
+        });
     }
 
     public void onDestroy() {

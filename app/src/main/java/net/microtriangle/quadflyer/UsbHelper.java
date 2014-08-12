@@ -29,11 +29,16 @@ public class UsbHelper {
     private SerialInputOutputManager usbIoManager;
     private static volatile UsbHelper instance;
     private Thread usbDrainerThread;
+    private UsbListener listener;
 
 
     private final LinkedBlockingDeque<byte[]> apmBuffer = new LinkedBlockingDeque<byte[]>();
     private final LinkedBlockingDeque<byte[]> mpBuffer = new LinkedBlockingDeque<byte[]>();
 
+    public static abstract class UsbListener {
+        public abstract void connected(boolean usbConnected);
+        public abstract void disconnected();
+    }
 
     private static class Drainer implements Runnable {
         private LinkedBlockingDeque<byte[]> source;
@@ -92,8 +97,9 @@ public class UsbHelper {
         return instance;
     }
 
-    public void start(Context context) {
+    public void start(Context context, final UsbListener listener) {
         usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        this.listener = listener;
 
         (new Thread(new Runnable() {
             @Override
@@ -121,8 +127,9 @@ public class UsbHelper {
                     }
                     drainer.start();
 
-                    startUsbIo();
+                    boolean usbConnected = startUsbIo();
                     Log.e(TAG, "Connected");
+                    listener.connected(usbConnected);
                     while (connected) {
                         byte data[] = new byte[100];
                         try {
@@ -137,6 +144,7 @@ public class UsbHelper {
 
                         }
                     }
+                    listener.disconnected();
                     Log.e(TAG, "Disconnected");
 
                     if (drainer != null) {
@@ -210,18 +218,23 @@ public class UsbHelper {
         return true;
     }
 
-    private void startUsbIo() {
+    private boolean startUsbIo() {
         Log.e(TAG, "Starting USB IO");
-        loadUsb();
+        boolean loaded = loadUsb();
 
-        (new Thread(usbIoManager)).start();
-        usbDrainerThread = new Thread(new Drainer(apmBuffer, usbPort));
-        usbDrainerThread.start();
+        if (loaded) {
+            (new Thread(usbIoManager)).start();
+            usbDrainerThread = new Thread(new Drainer(apmBuffer, usbPort));
+            usbDrainerThread.start();
+        }
+        return loaded;
     }
 
     private void stopUsbIo() {
         Log.e(TAG, "Stopping USB IO");
-        usbIoManager.stop();
-        usbDrainerThread.interrupt();
+        if (usbIoManager != null) {
+            usbIoManager.stop();
+            usbDrainerThread.interrupt();
+        }
     }
 }

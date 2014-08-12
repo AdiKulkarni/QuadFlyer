@@ -19,6 +19,7 @@
 
         <service android:enabled="true" android:name="net.microtriangle.quadflyer.WebService"/>
         <service android:enabled="true" android:name="net.microtriangle.quadflyer.UsbService"/>
+        <service android:enabled="true" android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
 
         <activity
             android:name=".MainActivity"
