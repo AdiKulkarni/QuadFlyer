@@ -77,12 +77,15 @@ public class MjpegResponse extends NanoHTTPD.Response {
                 }
             }
         } catch(InterruptedException e) {
+            Log.e(TAG, "Interrupted Exception");
         } catch (IOException e) {
+            Log.e(TAG, "IO Exception");
             // Do nothing
         } finally {
             try {
                 outputStream.close();
             } catch (IOException e) {
+                Log.e(TAG, "Outputstream close exception");
             }
         }
     }

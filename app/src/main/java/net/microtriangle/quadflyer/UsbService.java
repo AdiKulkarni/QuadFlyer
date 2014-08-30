@@ -25,7 +25,7 @@ public class UsbService extends Service {
     }
 
     public void onCreate() {
-        UsbHelper.getInstance().start(this, new UsbHelper.UsbListener() {
+        UsbHelper.getInstance().start(this, UsbHelper.ServerType.TCP, new UsbHelper.UsbListener() {
             @Override
             public void connected(boolean usbConnected) {
                 Intent intent = new Intent(TAG);

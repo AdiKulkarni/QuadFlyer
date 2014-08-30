@@ -12,6 +12,9 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -31,13 +34,49 @@ public class UsbHelper {
     private Thread usbDrainerThread;
     private UsbListener listener;
 
-
     private final LinkedBlockingDeque<byte[]> apmBuffer = new LinkedBlockingDeque<byte[]>();
     private final LinkedBlockingDeque<byte[]> mpBuffer = new LinkedBlockingDeque<byte[]>();
 
     public static abstract class UsbListener {
         public abstract void connected(boolean usbConnected);
         public abstract void disconnected();
+    }
+
+    public static enum ServerType {
+        TCP, UDP
+    }
+
+    public static class UdpDrainer implements Runnable {
+        private LinkedBlockingDeque<byte[]> source;
+        private InetAddress address;
+        private int port;
+        private DatagramSocket socket;
+
+        public UdpDrainer(LinkedBlockingDeque source, DatagramSocket socket) {
+            this.socket = socket;
+            this.source = source;
+            this.address = socket.getInetAddress();
+            this.port = socket.getPort();
+        }
+
+        public void run() {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    byte[] data = source.poll(1000, TimeUnit.MILLISECONDS);
+                    if (data != null) {
+                        DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+                        try {
+                            socket.send(packet);
+                        } catch(Exception e) {
+                            continue;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "UDP Drainer died " + e.toString());
+            }
+
+        }
     }
 
     private static class Drainer implements Runnable {
@@ -97,11 +136,11 @@ public class UsbHelper {
         return instance;
     }
 
-    public void start(Context context, final UsbListener listener) {
+    public void start(Context context, ServerType serverType, final UsbListener listener) {
         usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
         this.listener = listener;
 
-        (new Thread(new Runnable() {
+        Runnable tcpServer = new Runnable() {
             @Override
             public void run() {
                 ServerSocket server = null;
@@ -153,7 +192,71 @@ public class UsbHelper {
                     stopUsbIo();
                 }
             }
-        })).start();
+        };
+
+        Runnable udpServer = new Runnable() {
+            @Override
+            public void run() {
+                DatagramSocket socket;
+                try {
+                    socket = new DatagramSocket(4000);
+                } catch (Exception e) {
+                    return;
+                }
+
+                while(true) {
+                    String data = "";
+
+                    byte[] buf = new byte[256];
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                    while (!data.equals("==START==")) {
+                        try {
+                            socket.receive(packet);
+                        } catch (Exception e) {
+                            continue;
+                        }
+
+                        try {
+                            byte[] buffer = new byte[packet.getLength()];
+                            System.arraycopy(packet.getData(), packet.getOffset(), buffer, 0, packet.getLength());
+                            data = new String(buffer, "UTF-8");
+                        } catch (Exception e) {
+
+                        }
+                    }
+
+                    Thread drainer = null;
+                    try {
+                        drainer = new Thread(new UdpDrainer(mpBuffer, socket));
+                    } catch (Exception e) {
+
+                    }
+                    drainer.start();
+
+                    while (!data.equals("==END==")) {
+                        try {
+                            socket.receive(packet);
+                        } catch (Exception e) {
+                            break;
+                        }
+
+                        byte[] buffer = new byte[packet.getLength()];
+                        System.arraycopy(packet.getData(), packet.getOffset(), buffer, 0, packet.getLength());
+                        try {
+                            data = new String(buffer, "UTF-8");
+                        } catch (Exception e) {
+                        }
+
+                        if (!data.equals("==END==")) {
+                            apmBuffer.add(buffer);
+                        }
+                    }
+                }
+            }
+        };
+
+
+        (new Thread(serverType == ServerType.UDP ? udpServer : tcpServer)).start();
     }
     public void stop() {
         stopUsbIo();

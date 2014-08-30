@@ -71,6 +71,8 @@ public class MjpegHelper {
         editor.putInt("numResolution", camera.getParameters().getSupportedPreviewSizes().size());
         editor.commit();
         camera.release();
+
+        Log.e(TAG, "Done");
     }
 
     public void start() {
