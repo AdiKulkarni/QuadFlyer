@@ -57,7 +57,8 @@ public class MainActivity extends Activity {
                 .setContext(getApplicationContext())
                 .setAudioEncoder(SessionBuilder.AUDIO_NONE)
                 .setVideoEncoder(SessionBuilder.VIDEO_H264)
-                .setVideoQuality(new VideoQuality(640, 480, 20, 1000000));
+                .setVideoQuality(new VideoQuality(640, 480, 20, 1700000));
+                //.setVideoQuality(new VideoQuality(960, 720, 20, 1000000));
 
         Button buttonMjpeg = (Button) findViewById(R.id.buttonMjpeg);
         buttonMjpeg.setOnClickListener(new View.OnClickListener() {
@@ -69,9 +70,11 @@ public class MainActivity extends Activity {
 
                 if (streamingMjpeg) {
                     MjpegHelper.getInstance().stop();
+                    MainActivity.this.stopService(new Intent(MainActivity.this, MjpegUdpService.class));
                     textViewStreaming.setText("Video Streaming: None");
                 } else {
                     MjpegHelper.getInstance().start();
+                    MainActivity.this.startService(new Intent(MainActivity.this, MjpegUdpService.class));
                     textViewStreaming.setText("Video Streaming: MJPEG");
                 }
                 streamingMjpeg = !streamingMjpeg;

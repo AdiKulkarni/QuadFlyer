@@ -31,7 +31,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Toggle MJPEG (4001)"
+        android:text="Toggle UDP MJPEG (4004)"
         android:id="@+id/buttonMjpeg"
         android:layout_marginBottom="41dp"
         android:layout_alignParentBottom="true"

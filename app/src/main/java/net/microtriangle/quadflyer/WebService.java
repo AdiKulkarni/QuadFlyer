@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
  * Created by soedar on 7/8/14.
  */
 public class WebService extends Service {
+
     private static final String TAG = WebService.class.getName();
     private WebServer server;
 

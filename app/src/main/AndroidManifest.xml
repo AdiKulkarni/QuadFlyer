@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.microtriangle.quadflyer" >
+    package="net.microtriangle.quadflyer"
+    android:versionCode="2"
+    android:versionName="1.1">
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -19,6 +21,7 @@
 
         <service android:enabled="true" android:name="net.microtriangle.quadflyer.WebService"/>
         <service android:enabled="true" android:name="net.microtriangle.quadflyer.UsbService"/>
+        <service android:enabled="true" android:name="net.microtriangle.quadflyer.MjpegUdpService"/>
         <service android:enabled="true" android:name="net.majorkernelpanic.streaming.rtsp.RtspServer"/>
 
         <activity
