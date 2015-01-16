@@ -16,3 +16,6 @@ This project is mainly developed to provide low delay FPV piloting system for UA
   1. x264 encoded video streaming over RTP. This streaming method is similar to that of https://github.com/fyhertz/libstreaming
   2. MJPEG based video streaming over UDP. For more information on this please visit https://github.com/AdiKulkarni/GCS-CLI-Pilot. 
 
+##Developer Contact
+Website: http://www.comp.nus.edu.sg/~adityak
+Email: adityak@comp.nus.edu.sg
