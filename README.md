@@ -14,7 +14,7 @@ This project is mainly developed to provide low delay FPV piloting system for UA
 3] Provides two types of adaptive streaming of live video from UAV to GCS.
   
   1. x264 encoded video streaming over RTP. This streaming method is similar to that of https://github.com/fyhertz/libstreaming
-  2. MJPEG based video streaming over UDP. For more information on this please visit https://github.com/AdiKulkarni/GCS-CLI-Pilot. 
+  2. MJPEG based video streaming over UDP. This is adaptive protocol which changes quality of the streaming video as per the UAV speed, network condition etc. but still tries to maintain lowest delay possible for streaming. For more information on this please visit https://github.com/AdiKulkarni/GCS-CLI-Pilot. 
 
 ##Developer Contact
 Website: http://www.comp.nus.edu.sg/~adityak
